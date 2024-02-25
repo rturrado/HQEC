@@ -2,6 +2,11 @@ from OperatorPush.TensorToolbox import get_tensor_from_id, connect_tensors, swap
 from collections import deque
 
 
+def execute_connections(tensor_connections, tensor_list):
+    for (tensor_a, tensor_b) in tensor_connections:
+        connect_tensors(tensor_list, tensor_a, tensor_b)
+
+
 def create_layer_q4(tensor_list, previous_layer_id_list, legs_per_tensor):
     # Create a mapping for the tensor connections
     tensor_connections = {}
@@ -16,30 +21,29 @@ def create_layer_q4(tensor_list, previous_layer_id_list, legs_per_tensor):
             tensor_connections[(previous_layer_id_list[0], target_id)] = True
             if target_id not in tensor_id_of_this_layer:
                 tensor_id_of_this_layer.append(target_id)
-        # Execute the connections
-        for (tensor_a, tensor_b) in tensor_connections:
-            connect_tensors(tensor_list, tensor_a, tensor_b)
+        execute_connections(tensor_connections, tensor_list)
     else:
+        # This block looks quite obscure to read
+        # I wonder if you could first write it in pseudocode, then implement it with functions. E.g.:
+        # Walk previous layers
+        #     Get tensor from layer i
+        #     Calculate number of left legs
+        #     Walk legs
+        #         ...
         for i, previous_layer_tensor_id in enumerate(previous_layer_id_list):
-            last_tensor = False
-            if i == len(previous_layer_id_list) - 1:
-                last_tensor = True
             current_previous_layer_tensor = get_tensor_from_id(tensor_list, previous_layer_tensor_id)
             legs_number_left_for_current_tensor = legs_per_tensor - len(current_previous_layer_tensor.get_connections())
-            loop_num = legs_number_left_for_current_tensor
-            if last_tensor:
-                loop_num -= 1
+            # Define variables as close as possible to where they are fist used
+            last_tensor = (i == len(previous_layer_id_list) - 1)
+            loop_num = legs_number_left_for_current_tensor if last_tensor else legs_number_left_for_current_tensor - 1
             for j in range(loop_num):
                 target_id += 1
                 tensor_connections[(previous_layer_tensor_id, target_id)] = True
                 if target_id not in tensor_id_of_this_layer:
                     tensor_id_of_this_layer.append(target_id)
-            if last_tensor:
-                tensor_connections[(previous_layer_tensor_id, start_id)] = True
+            tensor_connections[(previous_layer_tensor_id, start_id)] = last_tensor
             target_id -= 1
-        # Execute the connections
-        for (tensor_a, tensor_b) in tensor_connections:
-            connect_tensors(tensor_list, tensor_a, tensor_b)
+        execute_connections(tensor_connections, tensor_list)
 
         # Swap leg 0 and 1 for the first tensor of this layer
         first_tensor_id_of_this_layer = tensor_id_of_this_layer[0]

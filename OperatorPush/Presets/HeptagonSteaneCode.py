@@ -1,8 +1,15 @@
+# Renamed file to look consistent with ExportToolbox.py, NetworkToolbox.py...
+
 from OperatorPush.NetworkToolbox import create_layer_q4, assign_layers_to_tensors
 from OperatorPush.TensorToolbox import ensure_minimum_legs, add_logical_legs, get_tensor_from_id, Tensor, has_logical
 
 
 def setup_heptagon_max_rate_steane(R):
+    # argument should be lowercase
+    # also, what is R? If it is a rate, rate should be a better name
+
+    # Is this block the same as in the next function? Then you should take it out to a function
+    # Something like build_tensor or whatever
     if type(R) is not int:
         raise ValueError("R is not int")
     elif R < 0:
@@ -32,6 +39,7 @@ def setup_heptagon_max_rate_steane(R):
     assign_layers_to_tensors(tensor_list=tensor_list, center_tensor_id=0)
 
     # Define UPS generators
+    # Look comment below, in the next function, turn this into ups_a
     UPSa1 = ['X', 'X', 'X', 'I', 'I', 'I', 'X', 'I']
     UPSa2 = ['X', 'I', 'X', 'X', 'X', 'I', 'I', 'I']
     UPSa3 = ['X', 'I', 'I', 'I', 'X', 'X', 'X', 'I']
@@ -50,11 +58,31 @@ def setup_heptagon_max_rate_steane(R):
     UPSb7 = ['I', 'I', 'I', 'I', 'X', 'X', 'X', 'X']
     UPSb8 = ['I', 'I', 'I', 'I', 'Z', 'Z', 'Z', 'Z']
 
-    ul = ['IIZZIZZI', 'IIXXIXXI', 'IZIZZZII', 'IXIXXXII', 'IYIYYYII', 'ZIIZZIZI', 'XIIXXIXI', 'YIIYYIYI', 'ZZIIIZZI', 'ZXIYYXZI', 'ZYIXXYZI', 'XZIYYZXI', 'YZIXXZYI', 'XXIIIXXI', 'XYIZZYXI', 'YXIZZXYI', 'YYIIIYYI']
+    # Some time ago, they used to pay people for lines of code
+    # With this change you would get 100$ more! haha
+    # No, seriously, I just think you can get a better view of the strings this way
+    ul = [
+        'IIZZIZZI',
+        'IIXXIXXI',
+        'IZIZZZII',
+        'IXIXXXII',
+        'IYIYYYII',
+        'ZIIZZIZI',
+        'XIIXXIXI',
+        'YIIYYIYI',
+        'ZZIIIZZI',
+        'ZXIYYXZI',
+        'ZYIXXYZI',
+        'XZIYYZXI',
+        'YZIXXZYI',
+        'XXIIIXXI',
+        'XYIZZYXI',
+        'YXIZZXYI',
+        'YYIIIYYI'
+    ]
 
     # Assign UPS to tensors
     for tensor in tensor_list:
-
         # Rule application
         neighbor_layers = [get_tensor_from_id(tensor_list, tensor_id).layer for tensor_id in tensor.get_connections()]
         current_layer = tensor.layer
@@ -90,32 +118,42 @@ def setup_heptagon_zero_rate_steane(R):
     tensor_list = []
     layer_list = []
     if R == 0:
-        tensor_0 = Tensor(num_legs=0, tensor_id=0)
-        tensor_list.append(tensor_0)
-    elif R == 1:
-        r1 = create_layer_q4(tensor_list=tensor_list, previous_layer_id_list=[0], legs_per_tensor=7)
-        layer_list.append(r1)
+        tensor_list.append(Tensor(num_legs=0, tensor_id=0))
     else:
-        r1 = create_layer_q4(tensor_list=tensor_list, previous_layer_id_list=[0], legs_per_tensor=7)
-        layer_list.append(r1)
-        for i, R_num in enumerate(range(2, R + 1)):
-            temp = create_layer_q4(tensor_list=tensor_list, previous_layer_id_list=layer_list[i], legs_per_tensor=8)
-            layer_list.append(temp)
+        layer_list.append(create_layer_q4(tensor_list, previous_layer_id_list=[0], legs_per_tensor=7))
+        if R > 1:
+            for i, R_num in enumerate(range(2, R + 1)):
+                layer_list.append(create_layer_q4(tensor_list, previous_layer_id_list=layer_list[i], legs_per_tensor=8))
 
     for i, current_layer_tensor_id_list in enumerate(layer_list):
         # Ensure Minimum Legs to 8 for tensors in this layer
-        ensure_minimum_legs(tensor_list=tensor_list, target_leg_number=8, start_idx=current_layer_tensor_id_list[0],
+        ensure_minimum_legs(tensor_list, target_leg_number=8,
+                            start_idx=current_layer_tensor_id_list[0],
                             end_idx=current_layer_tensor_id_list[-1] + 1)
 
     # Ensure Minimum Legs to 7 for tensor 0
-    ensure_minimum_legs(tensor_list=tensor_list, target_leg_number=7, start_idx=0, end_idx=1)
+    ensure_minimum_legs(tensor_list, target_leg_number=7, start_idx=0, end_idx=1)
     # Add Logical to tensor 0
-    add_logical_legs(tensor_list=tensor_list, start_idx=0, end_idx=1)
+    add_logical_legs(tensor_list, start_idx=0, end_idx=1)
 
     # Assign layer
-    assign_layers_to_tensors(tensor_list=tensor_list, center_tensor_id=0)
+    assign_layers_to_tensors(tensor_list, center_tensor_id=0)
 
     # Define UPS generators
+    # I would put this in a separate file
+    # I would rename to ups_a_1, ups_a_2
+    # Or even better, why not ups_a:
+    # ups_a = [
+    #     ['X', 'X', 'X', 'I', 'I', 'I', 'X', 'I'],
+    #     ['X', 'I', 'X', 'X', 'X', 'I', 'I', 'I'],
+    #     ['X', 'I', 'I', 'I', 'X', 'X', 'X', 'I'],
+    #     ['Z', 'Z', 'Z', 'I', 'I', 'I', 'Z', 'I'],
+    #     ['Z', 'I', 'Z', 'Z', 'Z', 'I', 'I', 'I'],
+    #     ['Z', 'I', 'I', 'I', 'Z', 'Z', 'Z', 'I'],
+    #     ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
+    #     ['Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z']
+    # ]
+
     UPSa1 = ['X', 'X', 'X', 'I', 'I', 'I', 'X', 'I']
     UPSa2 = ['X', 'I', 'X', 'X', 'X', 'I', 'I', 'I']
     UPSa3 = ['X', 'I', 'I', 'I', 'X', 'X', 'X', 'I']
@@ -134,7 +172,25 @@ def setup_heptagon_zero_rate_steane(R):
     UPSb7 = ['I', 'I', 'I', 'I', 'X', 'X', 'X', 'X']
     UPSb8 = ['I', 'I', 'I', 'I', 'Z', 'Z', 'Z', 'Z']
 
-    ul = ['IIZZIZZI', 'IIXXIXXI', 'IZIZZZII', 'IXIXXXII', 'IYIYYYII', 'ZIIZZIZI', 'XIIXXIXI', 'YIIYYIYI', 'ZZIIIZZI', 'ZXIYYXZI', 'ZYIXXYZI', 'XZIYYZXI', 'YZIXXZYI', 'XXIIIXXI', 'XYIZZYXI', 'YXIZZXYI', 'YYIIIYYI']
+    ul = [
+        'IIZZIZZI',
+        'IIXXIXXI',
+        'IZIZZZII',
+        'IXIXXXII',
+        'IYIYYYII',
+        'ZIIZZIZI',
+        'XIIXXIXI',
+        'YIIYYIYI',
+        'ZZIIIZZI',
+        'ZXIYYXZI',
+        'ZYIXXYZI',
+        'XZIYYZXI',
+        'YZIXXZYI',
+        'XXIIIXXI',
+        'XYIZZYXI',
+        'YXIZZXYI',
+        'YYIIIYYI'
+    ]
 
     UPSc1 = ['I', 'X', 'X', 'X', 'I', 'I', 'I', 'X']
     UPSc2 = ['I', 'X', 'I', 'X', 'X', 'X', 'I', 'I']
@@ -156,7 +212,6 @@ def setup_heptagon_zero_rate_steane(R):
 
     # Assign UPS to tensors
     for tensor in tensor_list:
-
         # Rule application
         neighbor_layers = [get_tensor_from_id(tensor_list, tensor_id).layer for tensor_id in tensor.get_connections()]
         current_layer = tensor.layer

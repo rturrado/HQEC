@@ -57,10 +57,10 @@ def auto_operator_push_decision(tensor_list, start_tensor_id, logger_mode=False)
 
         # Find neighbors of the current tensor
         for neighbor in current_tensor.get_connections():
-            if neighbor not in processed_tensors:
-                if neighbor not in tensors_for_next_round:
-                    if neighbor not in tensors_for_current_round:
-                        tensors_for_next_round.append(neighbor)
+            if neighbor not in processed_tensors and \
+                    neighbor not in tensors_for_next_round and \
+                    neighbor not in tensors_for_current_round:
+                tensors_for_next_round.append(neighbor)
 
         # Add unprocessed neighbors to the queue if queue is empty (current round is over)
         if len(queue) == 0:
@@ -207,6 +207,10 @@ def batch_push(tensor_list, logger_mode=False):
         stabilizers_results = {}
         logical_z_results = {}
         logical_x_results = {}
+
+        # These 3 blocks look like they could go in a function, e.g.:
+        # def blah(list, tensor_id, tensor_list, results):
+        # And call it like: blah(tensor.stabilizer_list, tensor_id, tensor_list, 'stabilizer')
         for index, ups in enumerate(tensor.stabilizer_list):
             temp_tensor_list = copy.deepcopy(tensor_list)
             result = push_operator(temp_tensor_list, ups, tensor_id, logger_mode=logger_mode)
@@ -249,6 +253,7 @@ def batch_push(tensor_list, logger_mode=False):
 
     return results  # Return a dictionary containing the results
 
+
 # Example usage:
 # results = batch_push(tensor_list)
 
@@ -260,6 +265,7 @@ def process_tensor(tensor, tensor_list, logger_mode):
     logical_z_results = {}
     logical_x_results = {}
 
+    # Here you could reuse the function mentioned above
     for index, ups in enumerate(tensor.stabilizer_list):
         temp_tensor_list = copy.deepcopy(tensor_list)
         result = push_operator(temp_tensor_list, ups, tensor_id, logger_mode=logger_mode)
@@ -291,7 +297,8 @@ def batch_push_multiprocessing(tensor_list, logger_mode=False):
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
     # Launch the process_tensor function for each tensor in parallel
-    process_results = [pool.apply_async(process_tensor, args=(tensor, tensor_list, logger_mode)) for tensor in tensor_list]
+    process_results = [pool.apply_async(process_tensor, args=(tensor, tensor_list, logger_mode)) for tensor in
+                       tensor_list]
 
     # Close the pool and wait for each task to complete
     pool.close()
@@ -315,6 +322,7 @@ def batch_push_multiprocessing(tensor_list, logger_mode=False):
             writer.writerow(row)
 
     return results  # Return a dictionary containing the results
+
 
 # Example usage:
 # results = batch_push(tensor_list)

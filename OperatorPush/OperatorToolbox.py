@@ -9,10 +9,15 @@ def pauli_product(operator_list):
 
 
 def pairwise_pauli_product(operator1, operator2):
-    if (operator1 not in ['I', 'X', 'Y', 'Z']) or (operator2 not in ['I', 'X', 'Y', 'Z']):
+    if (operator1 not in ['I', 'X', 'Y', 'Z']) or(operator2 not in ['I', 'X', 'Y', 'Z']):
         print("None Pauli Operator Error")
         return
-    product_table = [['I', 'X', 'Y', 'Z'], ['X', 'I', 'Z', 'Y'], ['Y', 'Z', 'I', 'X'], ['Z', 'Y', 'X', 'I']]
+    product_table = [
+        ['I', 'X', 'Y', 'Z'],
+        ['X', 'I', 'Z', 'Y'],
+        ['Y', 'Z', 'I', 'X'],
+        ['Z', 'Y', 'X', 'I']
+    ]
     # Convert Operator1 and Operator2 into indices and get output
     operator_to_index = ['I', 'X', 'Y', 'Z']
     product = product_table[operator_to_index.index(operator1)][operator_to_index.index(operator2)]
@@ -55,11 +60,7 @@ def elementwise_product(list1, list2):
 
 
 def pauli_flip(operator):
-    if operator == 'X':
-        return 'Z'
-    if operator == 'Z':
-        return 'X'
-    return operator
+    return 'Z' if operator == "X" else 'X' if operator == "Z" else operator
 
 
 def multiply_ups(ups_list, power_list):
@@ -115,9 +116,7 @@ def count_non_i_operator_num(result_string):
 
 
 def count_i_operator_num(result_string):
-    i = "I"
-    n_i = result_string.count(i)
-    return n_i
+    return result_string.count("I")
 
 
 def find_minimum_weight_representation_legacy(original_ups, stabilizer_generators):

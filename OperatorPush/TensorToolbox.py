@@ -159,6 +159,7 @@ class Tensor:
         logical_legs_list = [leg for leg in range(len(self.legs)) if self.legs[leg].logical]
 
         # Find the corresponding ups generator, with I on logical leg
+        # This for look may go in a separate function
         for ups_generator in self.ups_list:
             ups_matched = True
             # Iterate over the legs for ups push
@@ -188,6 +189,7 @@ class Tensor:
 
         # We still prefer ups with only I, X, Z (and I on logical leg),
         # so firstly check if there's a matching ups with only I, X, Z with I on logical leg
+        # This for look may go in a separate function
         for i in range(len(full_ups)):
             ups_matched = True
             ups = full_ups[i]
@@ -209,6 +211,7 @@ class Tensor:
                     break
 
         # Check if a ups was found
+        # This for look may go in a separate function
         if selected_ups is not None:
             if logger_mode:
                 logger.info(f'ups selected from the whole group, selected_ups = {selected_ups}, '
@@ -216,6 +219,10 @@ class Tensor:
             return selected_ups  # Return the selected ups
 
         # If there's no matching ups with only I, X, Z, then search the full group (I on logical leg)
+        # This for look may go in a separate function
+        # The 3 for loops look so similar, actually first and third look the same
+        # You may be able to extract the logic out to a funcion, name it properly and... boom!
+        # Imagine how beautiful this function would look with just 3 function calls :)
         for i in range(len(full_ups)):
             ups_matched = True
             ups = full_ups[i]
@@ -237,6 +244,7 @@ class Tensor:
                     break
 
         # Check if a ups was found
+        # This for look may go in a separate function
         if selected_ups is not None:
             if logger_mode:
                 logger.info(f'ups selected from the whole group, selected_ups = {selected_ups},'
